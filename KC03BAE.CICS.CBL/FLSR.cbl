@@ -223,6 +223,14 @@
 
            IF WS-RESP = DFHRESP(MAPFAIL)
                PERFORM SHOW-OUTBOUND-FLIGHTS
+               IF EIBAID = DFHENTER OR EIBAID = DFHPF2
+                   MOVE 'ERROR: SELECT A FLIGHT WITH X' TO MSGO
+                   EXEC CICS
+                       SEND MAP('FLSRMAP') MAPSET('FLSRMAP')
+                       FROM (FLSRMAPO)
+                       DATAONLY
+                   END-EXEC
+               END-IF
                MOVE 'O' TO WS-CA-STATE
                EXEC CICS
                    RETURN TRANSID('FLSR')
@@ -405,6 +413,14 @@
 
            IF WS-RESP = DFHRESP(MAPFAIL)
                PERFORM SHOW-RETURN-FLIGHTS
+               IF EIBAID = DFHENTER OR EIBAID = DFHPF2
+                   MOVE 'ERROR: SELECT A FLIGHT WITH X' TO MSGO
+                   EXEC CICS
+                       SEND MAP('FLSRMAP') MAPSET('FLSRMAP')
+                       FROM (FLSRMAPO)
+                       DATAONLY
+                   END-EXEC
+               END-IF
                MOVE 'R' TO WS-CA-STATE
                EXEC CICS
                    RETURN TRANSID('FLSR')

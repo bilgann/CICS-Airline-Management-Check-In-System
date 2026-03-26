@@ -17,7 +17,7 @@
      INDEXED -
      KEYS(6 0) -
      RECORDSIZE(91 91) -
-     TRACKS(5 5) -
+     TRACKS(50 20) -
      FREESPACE(20 10) -
      SHAREOPTIONS(2 3) -
      REUSE) -
