@@ -1,0 +1,157 @@
+=============================================================================
+BOOK CONFIRMATION SCREEN - IMPLEMENTATION SUMMARY
+=============================================================================
+
+FILES CREATED/UPDATED:
+----------------------
+
+1. KC03BAE.CICS.BMS/BOOK.bms
+   - Fixed mapset name mismatch (was FLSRMAP, now BOOKMAP)
+   - Simplified borders using === instead of box characters to avoid display issues
+   - Added NAMEV and PASSV fields to display user name and passport
+   - Created departure/return flight sections with:
+     * Travel date fields (DEPDATE, RETDATE) in MMM DD YYYY format
+     * Airport route display (origin --- destination)
+     * Departure and arrival time fields
+
+2. KC03BAE.CICS.CBL/BOOK.cbl (NEW)
+   - Receives COMMAREA with state='B' from FLSR after flight selection
+   - Formats dates from YYYYMMDD to "MMM DD YYYY" (e.g., "NOV 11 2026")
+   - Formats times from HHMM to "HH:MM" (e.g., "14:30")
+   - Displays passenger info (name, passport)
+   - Shows departure and return flight details (if round-trip)
+
+3. KC03BAE.CICS.JCL/BOOKJCL.jcl (NEW)
+   - JCL to compile BOOK.cbl COBOL program
+
+4. KC03BAE.CICS.JCL/BOOKMAP.jcl (NEW)
+   - JCL to assemble BOOKMAP BMS and create copybook
+
+5. KC03BAE.CICS.CBL/FLTS.cbl (UPDATED)
+   - EXPANDED COMMAREA from 45 to 79 bytes to include:
+     * CA-NAME (18 bytes)
+     * CA-PASSPORT (16 bytes)
+   - Captures name and passport from input screen
+   - Passes all data to FLSR
+
+6. KC03BAE.CICS.CBL/FLSR.cbl (UPDATED)
+   - EXPANDED COMMAREA from 45 to 79 bytes with name/passport fields
+   - Preserves name and passport throughout flight selection
+   - Modified to XCTL to BOOK program after:
+     * One-way flight selection (state='B')
+     * Round-trip return flight selection (state='B')
+
+=============================================================================
+COMPILATION/DEPLOYMENT STEPS:
+=============================================================================
+
+1. Upload updated BOOK.bms to mainframe:
+   - Copy local BOOK.bms to KC03BAE.CICS.BMS(BOOKMAP)
+
+2. Assemble BOOKMAP:
+   - Submit BOOKMAP.jcl
+   - Verify map assembles successfully (should match your JOB09739 output)
+   - Creates:
+     * Physical map in TSOECCC.CICSTS12.STUDENT.LOADLIB(BOOKMAP)
+     * Symbolic map in KC03BAE.CICS.COPYLIB(BOOKMAP)
+
+3. Compile BOOK program:
+   - Submit BOOKJCL.jcl
+   - Creates executable in TSOECCC.CICSTS12.STUDENT.LOADLIB(BOOK)
+
+4. Recompile FLTS program:
+   - Submit FLTS.jcl (COMMAREA changed from 45 to 79 bytes)
+
+5. Recompile FLSR program:
+   - Submit FLSR.jcl (COMMAREA changed from 45 to 79 bytes)
+
+6. CICS Resource Definitions:
+   - Define transaction BOOK if not already defined:
+     CEDA DEFINE TRANSACTION(BOOK) 
+          GROUP(yourgroup)
+          PROGRAM(BOOK)
+   - Or add to existing group and reinstall
+
+=============================================================================
+FIXES APPLIED (CC 0012 ERROR):
+=============================================================================
+
+The CC 0012 error was likely due to:
+- Mapset name mismatch (FLSRMAP vs BOOKMAP) - FIXED
+- Missing JCL files - CREATED
+- Incorrect COMMAREA length - FIXED (changed from 45 to 79)
+
+The BMS borders issue (showing POS=... text) was caused by:
+- Characters that don't render properly in 3270 terminals
+- SOLUTION: Replaced box borders (+, |) with simple === separators
+
+=============================================================================
+DATA FLOW:
+=============================================================================
+
+FLTS (state='I') 
+  → User enters name, passport, origin, dest, dates, trip type
+  
+FLTS (state='M' validation complete)
+  → XCTL to FLSR with COMMAREA(79) containing name, passport, travel data
+
+FLSR (state='S' then 'O')
+  → User selects outbound flight
+  
+FLSR (state='R' if round-trip)
+  → User selects return flight
+  
+FLSR → XCTL to BOOK with COMMAREA(79) state='B'
+
+BOOK (state='B')
+  → Displays formatted confirmation with:
+     - Passenger name and passport
+     - Formatted dates (MMM DD YYYY)
+     - Airport codes with visual route line
+     - Formatted times (HH:MM)
+     - Bordered flight sections
+
+=============================================================================
+COMMAREA STRUCTURE (79 BYTES):
+=============================================================================
+
+Byte   Length  Field          Description
+-----  ------  -------------  ---------------------------
+01     1       CA-STATE       Current state/screen
+02-19  18      CA-NAME        Passenger name
+20-35  16      CA-PASSPORT    Passport number  
+36-38  3       CA-ORIG        Origin airport code
+39-41  3       CA-DEST        Destination airport code
+42-49  8       CA-DEPDATE     Departure date (YYYYMMDD)
+50-57  8       CA-RETDATE     Return date (YYYYMMDD)
+58     1       CA-TRIPTYPE    'O'=one-way, 'R'=round-trip
+59-64  6       CA-OUT-FLT     Outbound flight number
+65-68  4       CA-OUT-DEP     Outbound departure time (HHMM)
+69-72  4       CA-OUT-ARR     Outbound arrival time (HHMM)
+73-78  6       CA-RET-FLT     Return flight number
+79-82  4       CA-RET-DEP     Return departure time (HHMM)
+83-86  4       CA-RET-ARR     Return arrival time (HHMM)
+
+=============================================================================
+TESTING:
+=============================================================================
+
+1. Clear CICS and newcopy programs:
+   CEMT SET PROG(FLTS) NEW
+   CEMT SET PROG(FLSR) NEW  
+   CEMT SET PROG(BOOK) NEW
+
+2. Start transaction:
+   FLTS
+
+3. Enter passenger details including name and passport
+
+4. Select flights and verify BOOK screen displays:
+   ✓ Name next to "NAME" label
+   ✓ Passport next to "PASSPORT NO" label
+   ✓ Formatted dates under DEPARTURE/RETURN
+   ✓ Airport codes properly displayed
+   ✓ Horizontal separator lines (not POS= text)
+   ✓ Formatted times
+
+=============================================================================

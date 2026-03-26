@@ -1,0 +1,22 @@
+CICS FILE DEFINITION FOR FLSR VSAM FILE
+========================================
+
+You need to define this file in CICS using CEDA or RDO:
+
+CEDA DEFINE FILE(FLSRFIL) GROUP(yourgroup)
+  DATASET(KC03BAE.CICS.FLSR)
+  STATUS(ENABLED)
+  OPENTIME(FIRSTREF)
+  DISPOSITION(SHR)
+  RECORDSIZE(38)
+  KEYLENGTH(5)
+  ADD(YES)
+  BROWSE(YES)
+  DELETE(NO)
+  READ(YES)
+  UPDATE(NO)
+
+Then install the group:
+CEDA INSTALL GROUP(yourgroup)
+
+Or ask your CICS administrator to add this file definition.

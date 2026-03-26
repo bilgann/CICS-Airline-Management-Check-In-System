@@ -1,0 +1,29 @@
+***********************************************************************
+* INTRO MAP - Welcome Screen
+* CICS Airline Reservation & Check In System
+* Developer: Bilgan Kiris
+***********************************************************************
+INTRO   DFHMSD  TYPE=&SYSPARM,MODE=OUT,LANG=COBOL,                     X000001
+               STORAGE=AUTO,TIOAPFX=YES,DSATTS=(COLOR,HILIGHT),        X000002
+               MAPATTS=(COLOR,HILIGHT)
+INTRO   DFHMDI  SIZE=(24,80),CTRL=(PRINT,FREEKB)
+*
+* TITLE SECTION
+TITLE1  DFHMDF  POS=(4,15),LENGTH=20,ATTRB=(PROT,BRT),                X000003
+               COLOR=GREEN,INITIAL='CICS Reservation'
+TITLE2  DFHMDF  POS=(6,30),LENGTH=25,ATTRB=(PROT,BRT),                X000004
+               COLOR=BLUE,INITIAL='By Bilgan Kiris'
+*
+* INSTRUCTIONS
+INST1   DFHMDF  POS=(10,20),LENGTH=40,ATTRB=(PROT,BRT),               X000005
+               COLOR=YELLOW,INITIAL='Press ENTER to Continue'
+INST2   DFHMDF  POS=(12,20),LENGTH=40,ATTRB=(PROT,BRT),               X000006
+               COLOR=YELLOW,INITIAL='Press PF3 to Exit'
+*
+* MESSAGE LINE
+MSGL    DFHMDF  POS=(24,1),LENGTH=4,ATTRB=(PROT,BRT)
+MSGO    DFHMDF  POS=(24,5),LENGTH=75,ATTRB=(PROT,BRT),                X000007
+               COLOR=NEUTRAL,INITIAL='Ready'
+*
+INTRO  DFHMSD TYPE=FINAL
+        END

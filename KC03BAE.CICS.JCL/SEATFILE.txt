@@ -1,0 +1,46 @@
+CICS FILE DEFINITION FOR SEAT VSAM FILE
+=======================================
+
+The CKIN2 program uses FILE('SEATFIL') to read and update seat records.
+You must define this as a CICS FILE resource pointing to the VSAM cluster
+KC03BAE.CICS.SEAT before seat selection can work.
+
+STEP 1 - Submit the load job
+----------------------------
+Submit SEATFIL.jcl to create and load the KC03BAE.CICS.SEAT cluster.
+
+
+STEP 2 - Define the CICS FILE resource
+--------------------------------------
+In CICS, type on a clear screen:
+
+  CEDA DEFINE FILE(SEATFIL) GROUP(KC03BAE)
+    DATASET(KC03BAE.CICS.SEAT)
+    STATUS(ENABLED)
+    OPENTIME(FIRSTREF)
+    DISPOSITION(SHR)
+    RECORDSIZE(33)
+    KEYLENGTH(6)
+    KEYPOSITION(1)
+    ADD(YES)
+    BROWSE(YES)
+    DELETE(YES)
+    READ(YES)
+    UPDATE(YES)
+
+  CEDA INSTALL FILE(SEATFIL) GROUP(KC03BAE)
+
+
+STEP 3 - Verify the file is open
+--------------------------------
+  CEMT INQUIRE FILE(SEATFIL)
+
+The response should show STATUS(ENABLED) and OPENSTATUS(OPEN).
+If it shows CLOSED, type:
+  CEMT SET FILE(SEATFIL) OPEN
+
+
+STEP 4 - Refresh the program
+----------------------------
+After compiling CKIN2, type:
+  CEMT SET PROG(CKIN2) NEWCOPY

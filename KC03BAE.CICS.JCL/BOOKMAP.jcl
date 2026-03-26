@@ -1,0 +1,44 @@
+//BOOKMAP JOB (KC03BAE),'BMS MAP',CLASS=A,MSGCLASS=H,NOTIFY=&SYSUID
+//*
+//* ASSEMBLE AND LINK BMS MAP BOOKMAP
+//*
+// SET CICS=DFH.V5R3M0.CICS
+// SET LE=CEE
+// SET USRPFX=KC03BAE.CICS
+//*
+//*********************************************************************
+//* 1. ASSEMBLE PHYSICAL MAP (LOAD MODULE)
+//*********************************************************************
+//ASMMAP   EXEC PGM=ASMA90,PARM='SYSPARM(MAP),DECK,NOOBJECT'
+//SYSLIB   DD DSN=&CICS..SDFHMAC,DISP=SHR
+//         DD DSN=SYS1.MACLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(1,1))
+//SYSPUNCH DD DSN=&&OBJSET,DISP=(,PASS),UNIT=SYSDA,SPACE=(CYL,(1,1))
+//* INPUT SOURCE: BOOKMAP IS A MEMBER OF KC03BAE.CICS.BMS
+//SYSIN    DD DSN=&USRPFX..BMS(BOOKMAP),DISP=SHR
+//*
+//*********************************************************************
+//* 2. LINK PHYSICAL MAP
+//*********************************************************************
+//LINKMAP  EXEC PGM=IEWL,PARM='LIST,LET,XREF,RMODE(24),AMODE(31)'
+//SYSLIB   DD DSN=&CICS..SDFHLOAD,DISP=SHR
+//SYSLMOD  DD DSN=TSOECCC.CICSTS12.STUDENT.LOADLIB(BOOKMAP),DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSLIN   DD DSN=&&OBJSET,DISP=(OLD,DELETE)
+//         DD *
+ NAME BOOKMAP(R)
+/*
+//*
+//*********************************************************************
+//* 3. ASSEMBLE SYMBOLIC MAP (COPYBOOK/DSECT)
+//*********************************************************************
+//ASMDSECT EXEC PGM=ASMA90,PARM='SYSPARM(DSECT),DECK,NOOBJECT'
+//SYSLIB   DD DSN=&CICS..SDFHMAC,DISP=SHR
+//         DD DSN=SYS1.MACLIB,DISP=SHR
+//SYSPRINT DD SYSOUT=*
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(1,1))
+//SYSPUNCH DD DSN=&USRPFX..COPYLIB(BOOKMAP),DISP=SHR
+//* INPUT SOURCE
+//SYSIN    DD DSN=&USRPFX..BMS(BOOKMAP),DISP=SHR
+//*

@@ -1,0 +1,61 @@
+CICS FILE DEFINITION FOR PNR VSAM FILE
+=======================================
+
+The BOOK and CKIN programs use FILE('PNRDATA') to read/write booking records.
+You must define this as a CICS FILE resource pointing to the VSAM cluster
+KC03BAE.CICS.PNR before those programs can save or retrieve PNR data.
+
+STEP 1 - Make sure the VSAM exists
+------------------------------------
+Submit PNRDATA.jcl to create the KC03BAE.CICS.PNR cluster (if not already done).
+Check with IDCAMS LISTCAT:
+  LISTCAT ENTRIES(KC03BAE.CICS.PNR) ALL
+
+
+STEP 2 - Define the CICS FILE resource
+----------------------------------------
+In CICS, type on a clear screen:
+
+  CEDA DEFINE FILE(PNRDATA) GROUP(KC03BAE)
+    DATASET(KC03BAE.CICS.PNR)
+    STATUS(ENABLED)
+    OPENTIME(FIRSTREF)
+    DISPOSITION(SHR)
+    RECORDSIZE(91)
+    KEYLENGTH(6)
+    KEYPOSITION(1)
+    ADD(YES)
+    BROWSE(YES)
+    DELETE(YES)
+    READ(YES)
+    UPDATE(YES)
+
+  CEDA INSTALL FILE(PNRDATA) GROUP(KC03BAE)
+
+
+STEP 3 - Verify the file is open
+----------------------------------
+  CEMT INQUIRE FILE(PNRDATA)
+
+The response should show STATUS(ENABLED) and OPENSTATUS(OPEN).
+If it shows CLOSED, type:
+  CEMT SET FILE(PNRDATA) OPEN
+
+
+STEP 4 - NEWCOPY BOOK (after recompile)
+-----------------------------------------
+  CEMT SET PROG(BOOK) NEWCOPY
+  CEMT SET PROG(CKIN) NEWCOPY
+
+
+DIAGNOSING THE ERROR CODE
+--------------------------
+After the code update, the BOOK screen will show:
+  SAVE ERR RESP=XXXXXXXX
+
+Common RESP values for FILE operations:
+  00000012  FILENOTFOUND  - No CICS FILE resource named PNRDATA (do Steps 1-2)
+  00000013  NOTFND        - Record not found (usually OK, handled internally)
+  00000014  DUPREC        - Duplicate key (PNR already exists in VSAM)
+  00000017  IOERR         - VSAM I/O error (check VSAM cluster health)
+  00000024  NOTOPEN       - File defined but not open (do CEMT SET FILE OPEN)
