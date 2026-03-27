@@ -1,4 +1,4 @@
-IDENTIFICATION DIVISION.
+       IDENTIFICATION DIVISION.
        PROGRAM-ID. FLTS.
 
        DATA DIVISION.
@@ -183,7 +183,12 @@ IDENTIFICATION DIVISION.
                ELSE
       *            Prepare data for FLSR screen
                    MOVE 'S' TO WS-CA-STATE
-                   MOVE NAMEINI TO WS-CA-NAME
+                   MOVE SPACES TO WS-CA-NAME
+                   STRING FNAMEINI DELIMITED BY SPACE
+                          SPACE DELIMITED BY SIZE
+                          LNAMEINI DELIMITED BY SPACE
+                       INTO WS-CA-NAME
+                   END-STRING
                    MOVE PASSINI TO WS-CA-PASSPORT
                    MOVE ORIGININI TO WS-CA-ORIG
                    MOVE DESTINI TO WS-CA-DEST
@@ -234,13 +239,13 @@ IDENTIFICATION DIVISION.
                PERFORM VALIDATE-DOB
            END-IF
            IF WS-VALID-FLAG = 'Y'
+               PERFORM VALIDATE-NUMP
+           END-IF
+           IF WS-VALID-FLAG = 'Y'
                PERFORM VALIDATE-PASSWORD
            END-IF
            IF WS-VALID-FLAG = 'Y'
                PERFORM VALIDATE-ORIGIN-DEST
-           END-IF
-           IF WS-VALID-FLAG = 'Y'
-               PERFORM VALIDATE-NUMP
            END-IF
            IF WS-VALID-FLAG = 'Y'
                PERFORM VALIDATE-TRIP
@@ -256,15 +261,24 @@ IDENTIFICATION DIVISION.
       * =======================================================
        VALIDATE-NAME.
 
-           IF NAMEINI = SPACES OR NAMEINL = 0
-              OR FUNCTION TRIM(NAMEINI) = SPACES
-               MOVE 'ERROR: NAME CANNOT BE EMPTY' TO MSGO
+           IF FNAMEINI = SPACES OR FNAMEINL = 0
+              OR LNAMEINI = SPACES OR LNAMEINL = 0
+              OR FUNCTION TRIM(FNAMEINI) = SPACES
+              OR FUNCTION TRIM(LNAMEINI) = SPACES
+               MOVE 'ERROR: FIRST AND LAST NAME REQUIRED' TO MSGO
                MOVE 'N' TO WS-VALID-FLAG
            ELSE
                MOVE 'N' TO WS-NUMERIC-FOUND
                PERFORM VARYING WS-I FROM 1 BY 1
-                   UNTIL WS-I > LENGTH OF NAMEINI
-                   IF NAMEINI(WS-I:1) IS NUMERIC
+                   UNTIL WS-I > LENGTH OF FNAMEINI
+                   IF FNAMEINI(WS-I:1) IS NUMERIC
+                       MOVE 'Y' TO WS-NUMERIC-FOUND
+                   END-IF
+               END-PERFORM
+
+               PERFORM VARYING WS-I FROM 1 BY 1
+                   UNTIL WS-I > LENGTH OF LNAMEINI
+                   IF LNAMEINI(WS-I:1) IS NUMERIC
                        MOVE 'Y' TO WS-NUMERIC-FOUND
                    END-IF
                END-PERFORM
@@ -275,15 +289,29 @@ IDENTIFICATION DIVISION.
                    MOVE 'N' TO WS-VALID-FLAG
                ELSE
                    PERFORM VARYING WS-I FROM 1 BY 1
-                       UNTIL WS-I > LENGTH OF NAMEINI
-                       IF NAMEINI(WS-I:1) NOT = SPACE
-                           AND NAMEINI(WS-I:1) NOT = '-'
-                           AND NAMEINI(WS-I:1) IS NOT ALPHABETIC
+                       UNTIL WS-I > LENGTH OF FNAMEINI
+                       IF FNAMEINI(WS-I:1) NOT = SPACE
+                           AND FNAMEINI(WS-I:1) NOT = '-'
+                           AND FNAMEINI(WS-I:1) IS NOT ALPHABETIC
                            MOVE 'ERROR: NAME CAN ONLY CONTAIN LETTERS'
                                TO MSGO
                            MOVE 'N' TO WS-VALID-FLAG
                        END-IF
                    END-PERFORM
+
+                   IF WS-VALID-FLAG = 'Y'
+                       PERFORM VARYING WS-I FROM 1 BY 1
+                           UNTIL WS-I > LENGTH OF LNAMEINI
+                           IF LNAMEINI(WS-I:1) NOT = SPACE
+                              AND LNAMEINI(WS-I:1) NOT = '-'
+                              AND LNAMEINI(WS-I:1) IS NOT ALPHABETIC
+                               MOVE 
+                               'ERROR: NAME CAN ONLY CONTAIN LETTERS'
+                                   TO MSGO
+                               MOVE 'N' TO WS-VALID-FLAG
+                           END-IF
+                       END-PERFORM
+                   END-IF
                END-IF
            END-IF.
 
@@ -380,6 +408,31 @@ IDENTIFICATION DIVISION.
                MOVE 'ERROR: ORIGIN AND DESTINATION REQUIRED'
                    TO MSGO
                MOVE 'N' TO WS-VALID-FLAG
+           ELSE
+               IF FUNCTION UPPER-CASE(ORIGININI) NOT = 'YYZ'
+                  AND FUNCTION UPPER-CASE(ORIGININI) NOT = 'IST'
+                  AND FUNCTION UPPER-CASE(ORIGININI) NOT = 'JFK'
+                  AND FUNCTION UPPER-CASE(ORIGININI) NOT = 'LAX'
+                   MOVE 'ERROR: ORIGIN MUST BE YYZ/IST/JFK/LAX'
+                       TO MSGO
+                   MOVE 'N' TO WS-VALID-FLAG
+               END-IF
+
+               IF WS-VALID-FLAG = 'Y'
+                  IF FUNCTION UPPER-CASE(DESTINI) NOT = 'YYZ'
+                     AND FUNCTION UPPER-CASE(DESTINI) NOT = 'IST'
+                     AND FUNCTION UPPER-CASE(DESTINI) NOT = 'JFK'
+                     AND FUNCTION UPPER-CASE(DESTINI) NOT = 'LAX'
+                      MOVE 'ERROR: DEST MUST BE YYZ/IST/JFK/LAX'
+                          TO MSGO
+                      MOVE 'N' TO WS-VALID-FLAG
+                  END-IF
+               END-IF
+
+               IF WS-VALID-FLAG = 'Y'
+                   MOVE FUNCTION UPPER-CASE(ORIGININI) TO ORIGININI
+                   MOVE FUNCTION UPPER-CASE(DESTINI) TO DESTINI
+               END-IF
            END-IF.
 
       * =======================================================
@@ -496,7 +549,8 @@ IDENTIFICATION DIVISION.
 
        SEND-INITIAL-SCREEN.
 
-           MOVE SPACES TO NAMEINO
+           MOVE SPACES TO FNAMEINO
+           MOVE SPACES TO LNAMEINO
            MOVE SPACES TO MSGO
            PERFORM CLEAR-INPUT-FIELDS
 
@@ -514,7 +568,8 @@ IDENTIFICATION DIVISION.
       * =======================================================
        CLEAR-INPUT-FIELDS.
            move low-values to fltsmapo.
-           MOVE SPACES TO NAMEINI
+           MOVE SPACES TO FNAMEINI
+           MOVE SPACES TO LNAMEINI
            MOVE SPACES TO PASSINI
            MOVE ZERO TO DOBINI
            MOVE 'DDMMYYYY' TO DOBINO

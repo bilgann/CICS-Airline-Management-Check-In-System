@@ -16,7 +16,7 @@
        01 WS-ABSTIME               PIC S9(15) COMP-3.
        01 WS-CURR-DATE             PIC X(8).
        01 WS-CURR-TIME             PIC X(6).
-    01 WS-PNR-RETRY             PIC 99 VALUE 0.
+       01 WS-PNR-RETRY             PIC 99 VALUE 0.
        01 WS-PNR-WRITTEN           PIC X VALUE 'N'.
        01 WS-LAST-NAME             PIC X(16).
        01 WS-TEMP-NAME             PIC X(18).
@@ -40,7 +40,7 @@
            05 PR-RET-FLT           PIC X(6).
            05 PR-RET-DEP           PIC X(4).
            05 PR-RET-ARR           PIC X(4).
-       
+
       * Date conversion work fields
        01 WS-MONTH-TABLE.
            05 FILLER               PIC X(3) VALUE 'JAN'.
@@ -57,7 +57,7 @@
            05 FILLER               PIC X(3) VALUE 'DEC'.
        01 WS-MONTH-NAMES REDEFINES WS-MONTH-TABLE.
            05 WS-MONTH-NAME OCCURS 12 TIMES PIC X(3).
-           
+
        01 WS-MONTH-NUM             PIC 99.
        01 WS-FORMATTED-DATE        PIC X(11).
        01 WS-TIME-FORMATTED        PIC X(5).
@@ -151,7 +151,7 @@
                        COMMAREA(DFHCOMMAREA)
                        LENGTH(92)
                    END-EXEC
-                   
+
                WHEN OTHER
                    PERFORM SEND-ERROR-MESSAGE
                    EXEC CICS RETURN END-EXEC
@@ -162,15 +162,16 @@
       * =======================================================
        DISPLAY-CONFIRMATION.
            MOVE LOW-VALUES TO BOOKMAPO.
-           
+
       *    Populate name and passport
            MOVE CA-NAME TO NAMEVO
            MOVE CA-PASSPORT TO PASSVO.
-           
+
       *    Format and display departure date
            PERFORM FORMAT-DATE-DEPDATE
            MOVE WS-FORMATTED-DATE TO DEPDATEO.
-           
+           MOVE CA-OUT-FLT TO DEPFLTVO.
+
       *    Populate departure flight info
            MOVE CA-ORIG TO DEPORGO
            MOVE CA-DEST TO DEPDSTO
@@ -178,13 +179,14 @@
            MOVE WS-TIME-FORMATTED TO DEPTIMEO
            PERFORM FORMAT-TIME-OUTARR
            MOVE WS-TIME-FORMATTED TO DEPARRO.
-           
+
       *    Handle return flight if round trip
            IF CA-TRIPTYPE = 'R'
       *        Format and display return date
                PERFORM FORMAT-DATE-RETDATE
                MOVE WS-FORMATTED-DATE TO RETDATEO
-               
+               MOVE CA-RET-FLT TO RETFLTVO
+
       *        Populate return flight info (reverse route)
                MOVE CA-DEST TO RETORGO
                MOVE CA-ORIG TO RETDSTO
@@ -214,7 +216,7 @@
                WHEN OTHER
                    MOVE SPACES TO MSGO
            END-EVALUATE.
-           
+
       *    Send the map
            EXEC CICS
                SEND MAP('BOOKMAP') MAPSET('BOOKMAP')
@@ -382,6 +384,8 @@
        HIDE-RETURN-SECTION.
            MOVE SPACES TO RETURNO
            MOVE SPACES TO RETDATEO
+           MOVE SPACES TO RETFLTLO
+           MOVE SPACES TO RETFLTVO
            MOVE SPACES TO RETSEP1O
            MOVE SPACES TO RETORGO
            MOVE SPACES TO RETSEPO

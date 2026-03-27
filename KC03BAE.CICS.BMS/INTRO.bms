@@ -8,21 +8,65 @@ INTRO   DFHMSD  TYPE=&SYSPARM,MODE=OUT,LANG=COBOL,                     X000001
                MAPATTS=(COLOR,HILIGHT)
 INTRO   DFHMDI  SIZE=(24,80),CTRL=(PRINT,FREEKB)
 *
+* ASCII ART BANNER
+ART001   DFHMDF POS=(1,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='    ___       ___       ___       ___   '
+ART002   DFHMDF POS=(2,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='   /\  \     /\  \     /\  \     /\  \  '
+ART003   DFHMDF POS=(3,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='  /::\  \   _\:\  \   /::\  \   /::\  \ '
+ART004   DFHMDF POS=(4,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL=' /:/\:\__\ /\/::\__\ /:/\:\__\ /\:\:\__\ '
+ART005   DFHMDF POS=(5,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL=' \:\ \/__/ \::/\/__/ \:\ \/__/ \:\:\/__/'
+ART006   DFHMDF POS=(6,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='  \:\__\    \:\__\    \:\__\    \::/  / '
+ART007   DFHMDF POS=(7,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='   \/__/     \/__/     \/__/     \/__/  '
+ART101A  DFHMDF POS=(8,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='    ___       ___       ___       ___   '
+ART101B  DFHMDF POS=(8,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='    ___       ___       ___            '
+ART102A  DFHMDF POS=(9,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,    *
+               INITIAL='   /\  \     /\  \     /\__\     /\  \ '
+ART102B  DFHMDF POS=(9,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='    /\  \     /\  \     /\  \     /\  \ '
+ART103A  DFHMDF POS=(10,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='   \:\  \   /::\  \   /:/ _/_   /::\  \ '
+ART103B  DFHMDF POS=(10,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,  *
+               INITIAL='  /::\  \   /::\  \   /::\  \            '
+ART104A  DFHMDF POS=(11,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='   /::\__\ /::\:\__\ /::-"\__\ /::\:\__\ '
+ART104B  DFHMDF POS=(11,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,  *
+               INITIAL='/:/\:\__\ /::\:\__\ /::\:\__\            '
+ART105A  DFHMDF POS=(12,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='  /:/\/__/ \/\::/  / \;:;-",-" \:\:\/  / '
+ART105B  DFHMDF POS=(12,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,  *
+               INITIAL=' \:\/:/  / \/\:\/__/ \/\:\/__/            '
+ART106A  DFHMDF POS=(13,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='  \/__/      /:/  /   |:|  |    \:\/  / '
+ART106B  DFHMDF POS=(13,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,  *
+               INITIAL='  \::/  /     \/__/     \/__/            '
+ART107A  DFHMDF POS=(14,1),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,   *
+               INITIAL='             \/__/     \|__|     \/__/ '
+ART107B  DFHMDF POS=(14,41),LENGTH=40,ATTRB=(PROT,BRT),COLOR=NEUTRAL,  *
+               INITIAL='    \/__/                                '
+*
 * TITLE SECTION
-TITLE1  DFHMDF  POS=(4,15),LENGTH=20,ATTRB=(PROT,BRT),                X000003
-               COLOR=GREEN,INITIAL='CICS Reservation'
-TITLE2  DFHMDF  POS=(6,30),LENGTH=25,ATTRB=(PROT,BRT),                X000004
-               COLOR=BLUE,INITIAL='By Bilgan Kiris'
+TITLE1   DFHMDF POS=(17,22),LENGTH=40,ATTRB=(PROT,BRT),COLOR=BLUE,     *
+               INITIAL='CICS Airline Reservation Check In System'
+TITLE2   DFHMDF POS=(19,34),LENGTH=15,ATTRB=(PROT,BRT),COLOR=BLUE,     *
+               INITIAL='By Bilgan Kiris'
 *
 * INSTRUCTIONS
-INST1   DFHMDF  POS=(10,20),LENGTH=40,ATTRB=(PROT,BRT),               X000005
-               COLOR=YELLOW,INITIAL='Press ENTER to Continue'
-INST2   DFHMDF  POS=(12,20),LENGTH=40,ATTRB=(PROT,BRT),               X000006
-               COLOR=YELLOW,INITIAL='Press PF3 to Exit'
+INST1    DFHMDF POS=(21,4),LENGTH=23,ATTRB=(PROT,BRT),COLOR=YELLOW,    *
+               INITIAL='Press ENTER to Continue'
+INST2    DFHMDF POS=(21,59),LENGTH=17,ATTRB=(PROT,BRT),COLOR=YELLOW,   *
+               INITIAL='Press PF3 to Exit'
 *
 * MESSAGE LINE
 MSGL    DFHMDF  POS=(24,1),LENGTH=4,ATTRB=(PROT,BRT)
-MSGO    DFHMDF  POS=(24,5),LENGTH=75,ATTRB=(PROT,BRT),                X000007
+MSGO    DFHMDF  POS=(24,6),LENGTH=74,ATTRB=(PROT,BRT),                 X000007
                COLOR=NEUTRAL,INITIAL='Ready'
 *
 INTRO  DFHMSD TYPE=FINAL
