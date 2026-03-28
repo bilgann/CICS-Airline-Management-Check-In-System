@@ -353,7 +353,13 @@
       * =======================================================
        FORMAT-DATE-DEP.
            IF PR-DEPDATE NOT = SPACES AND PR-DEPDATE NOT = LOW-VALUES
-               MOVE PR-DEPDATE(5:2) TO WS-MONTH-NUM
+               IF PR-DEPDATE(1:4) IS NUMERIC
+                  AND PR-DEPDATE(5:2) IS NUMERIC
+                  AND PR-DEPDATE(7:2) IS NUMERIC
+                   MOVE PR-DEPDATE(5:2) TO WS-MONTH-NUM
+               ELSE
+                   MOVE 0 TO WS-MONTH-NUM
+               END-IF
                IF WS-MONTH-NUM >= 1 AND WS-MONTH-NUM <= 12
                    STRING WS-MONTH-NAME(WS-MONTH-NUM) ' '
                           PR-DEPDATE(7:2) ' '
@@ -369,7 +375,13 @@
 
        FORMAT-DATE-RET.
            IF PR-RETDATE NOT = SPACES AND PR-RETDATE NOT = LOW-VALUES
-               MOVE PR-RETDATE(5:2) TO WS-MONTH-NUM
+               IF PR-RETDATE(1:4) IS NUMERIC
+                  AND PR-RETDATE(5:2) IS NUMERIC
+                  AND PR-RETDATE(7:2) IS NUMERIC
+                   MOVE PR-RETDATE(5:2) TO WS-MONTH-NUM
+               ELSE
+                   MOVE 0 TO WS-MONTH-NUM
+               END-IF
                IF WS-MONTH-NUM >= 1 AND WS-MONTH-NUM <= 12
                    STRING WS-MONTH-NAME(WS-MONTH-NUM) ' '
                           PR-RETDATE(7:2) ' '

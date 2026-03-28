@@ -54,6 +54,12 @@
            05 CA-PNR               PIC X(6).
            05 CA-BAGGAGE           PIC X(1).
            05 CA-HANDLUGGAGE       PIC X(1).
+           05 CA-OUT-SEAT          PIC X(3).
+           05 CA-RET-SEAT          PIC X(3).
+           05 CA-OUT-BAGGAGE       PIC X(1).
+           05 CA-OUT-CARRYON       PIC X(1).
+           05 CA-RET-BAGGAGE       PIC X(1).
+           05 CA-RET-CARRYON       PIC X(1).
 
        PROCEDURE DIVISION USING DFHCOMMAREA.
 
@@ -73,7 +79,7 @@
                EXEC CICS
                    XCTL PROGRAM('CKIN')
                         COMMAREA(DFHCOMMAREA)
-                        LENGTH(94)
+                        LENGTH(104)
                END-EXEC
                EXEC CICS RETURN END-EXEC
            END-IF
@@ -83,6 +89,12 @@
               AND CA-STATE NOT = 'C'
                MOVE 'D' TO CA-STATE
                MOVE SPACES TO WS-MESSAGE
+               MOVE SPACES TO CA-OUT-SEAT
+               MOVE SPACES TO CA-RET-SEAT
+               MOVE SPACES TO CA-OUT-BAGGAGE
+               MOVE SPACES TO CA-OUT-CARRYON
+               MOVE SPACES TO CA-RET-BAGGAGE
+               MOVE SPACES TO CA-RET-CARRYON
                PERFORM DISPLAY-STAGE-SCREEN
                PERFORM RETURN-TO-CKIN2
            END-IF
@@ -113,7 +125,11 @@
                    PERFORM DISPLAY-STAGE-SCREEN
            END-EVALUATE
 
-           PERFORM RETURN-TO-CKIN2.
+           IF CA-STATE = 'C'
+               PERFORM TRANSFER-TO-CKIN3
+           ELSE
+               PERFORM RETURN-TO-CKIN2
+           END-IF.
 
       * =======================================================
       *            PROCESS DEPARTURE SEAT SELECTION
@@ -128,7 +144,7 @@
            END-IF
 
            MOVE CA-OUT-FLT TO WS-SEAT-KEY
-           PERFORM LOAD-SEAT-RECORD-UPDATE
+           PERFORM LOAD-SEAT-RECORD
 
            IF WS-RESP NOT = DFHRESP(NORMAL)
                STRING 'NO SEAT DATA FOUND FOR FLIGHT '
@@ -150,28 +166,16 @@
                EXIT PARAGRAPH
            END-IF
 
-           MOVE SPACES TO SR-SEATNO(WS-SEAT-INDEX)
-
-           EXEC CICS
-               REWRITE FILE('SEATFIL')
-                       FROM(WS-SEAT-REC)
-                       RESP(WS-RESP)
-           END-EXEC
-
-           IF WS-RESP NOT = DFHRESP(NORMAL)
-               MOVE 'UNABLE TO SAVE SELECTED DEPARTURE SEAT.' TO
-                   WS-MESSAGE
-               PERFORM DISPLAY-STAGE-SCREEN
-               EXIT PARAGRAPH
-           END-IF
-
            IF CA-TRIPTYPE = 'R' OR CA-TRIPTYPE = 'r'
+               MOVE WS-SELECTED-SEAT TO CA-OUT-SEAT
                MOVE 'R' TO CA-STATE
                STRING 'DEPARTURE SEAT ' WS-SELECTED-SEAT
                       ' SAVED. SELECT RETURN SEAT.'
                    DELIMITED BY SIZE INTO WS-MESSAGE
                END-STRING
            ELSE
+               MOVE WS-SELECTED-SEAT TO CA-OUT-SEAT
+               MOVE SPACES TO CA-RET-SEAT
                MOVE 'C' TO CA-STATE
                STRING 'CHECK-IN COMPLETE. FLIGHT ' CA-OUT-FLT
                       ' SEAT ' WS-SELECTED-SEAT ' CONFIRMED.'
@@ -194,7 +198,7 @@
            END-IF
 
            MOVE CA-RET-FLT TO WS-SEAT-KEY
-           PERFORM LOAD-SEAT-RECORD-UPDATE
+           PERFORM LOAD-SEAT-RECORD
 
            IF WS-RESP NOT = DFHRESP(NORMAL)
                STRING 'NO SEAT DATA FOUND FOR FLIGHT '
@@ -216,21 +220,8 @@
                EXIT PARAGRAPH
            END-IF
 
-           MOVE SPACES TO SR-SEATNO(WS-SEAT-INDEX)
-
-           EXEC CICS
-               REWRITE FILE('SEATFIL')
-                       FROM(WS-SEAT-REC)
-                       RESP(WS-RESP)
-           END-EXEC
-
-           IF WS-RESP NOT = DFHRESP(NORMAL)
-               MOVE 'UNABLE TO SAVE SELECTED RETURN SEAT.' TO WS-MESSAGE
-               PERFORM DISPLAY-STAGE-SCREEN
-               EXIT PARAGRAPH
-           END-IF
-
            MOVE 'C' TO CA-STATE
+              MOVE WS-SELECTED-SEAT TO CA-RET-SEAT
            STRING 'CHECK-IN COMPLETE. FLIGHT ' CA-RET-FLT
                   ' SEAT ' WS-SELECTED-SEAT ' CONFIRMED.'
                DELIMITED BY SIZE INTO WS-MESSAGE
@@ -291,18 +282,16 @@
            END-IF
            PERFORM DISPLAY-STAGE-SCREEN.
 
-      * =======================================================
-      *            TRANSFER TO BAGGAGE SCREEN (CKIN3)
+      * =======================================================      *
       * =======================================================
        TRANSFER-TO-CKIN3.
            EXEC CICS
                XCTL PROGRAM('CKIN3')
                     COMMAREA(DFHCOMMAREA)
-                    LENGTH(94)
+                    LENGTH(104)
            END-EXEC.
 
-      * =======================================================
-      *              SET CURRENT FLIGHT CONTEXT
+      * =======================================================      *
       * =======================================================
        SET-CURRENT-FLIGHT-CONTEXT.
            IF CA-STATE = 'R'
@@ -320,11 +309,12 @@
                END-IF
            END-IF.
 
+           MOVE WS-CURRENT-FLIGHT TO WS-SEAT-KEY.
+
       * =======================================================
       *                READ SEAT RECORD
       * =======================================================
        LOAD-SEAT-RECORD.
-           MOVE WS-CURRENT-FLIGHT TO WS-SEAT-KEY
            MOVE LOW-VALUES TO WS-SEAT-REC
 
            EXEC CICS
@@ -409,5 +399,5 @@
            EXEC CICS
                RETURN TRANSID(WS-TRANSID)
                       COMMAREA(DFHCOMMAREA)
-                      LENGTH(94)
+                      LENGTH(104)
            END-EXEC.

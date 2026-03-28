@@ -9,14 +9,11 @@
       * =======================================================
        COPY DFHAID.
        COPY DFHBMSCA.
-       COPY BPASSMAP.
+       COPY BPMAPS.
 
        01 WS-RESP                  PIC S9(8) COMP.
        01 WS-TRANSID               PIC X(4) VALUE 'CKI4'.
        01 WS-MESSAGE               PIC X(70).
-       01 WS-FIRST-NAME            PIC X(9).
-       01 WS-LAST-NAME             PIC X(9).
-       01 WS-PASSENGER             PIC X(20).
 
        LINKAGE SECTION.
        01 DFHCOMMAREA.
@@ -68,42 +65,32 @@
               MOVE 'BOARDING PASS DISPLAYED.' TO WS-MESSAGE
            END-IF
 
-           PERFORM BUILD-BOARDINGPASS-SCREEN
-           PERFORM SEND-BOARDINGPASS-SCREEN
-           PERFORM RETURN-TO-BPASS.
+           PERFORM BUILD-SCREEN
+           PERFORM SEND-SCREEN
+           PERFORM RETURN-PROGRAM.
 
       * =======================================================
       *            BOARDING PASS SCREEN CONTENT
       * =======================================================
-       BUILD-BOARDINGPASS-SCREEN.
-           MOVE LOW-VALUES TO BPMAPO
+       BUILD-SCREEN.
+            MOVE LOW-VALUES TO BPMAPSO
 
-           MOVE CA-NAME(1:9)  TO WS-FIRST-NAME
-           MOVE CA-NAME(10:9) TO WS-LAST-NAME
-           MOVE SPACES        TO WS-PASSENGER
-           STRING WS-FIRST-NAME DELIMITED BY SPACE
-                  ' '           DELIMITED BY SIZE
-                  WS-LAST-NAME  DELIMITED BY SPACE
-             INTO WS-PASSENGER
-           END-STRING
-
-           MOVE WS-PASSENGER    TO PNAMEOO
-           MOVE CA-PNR          TO PNRVOO
+           MOVE CA-NAME         TO PNAMEOO
            MOVE CA-OUT-FLT      TO FLTOO
            MOVE CA-DEPDATE      TO DATOO
            MOVE CA-ORIG         TO FROMOO
            MOVE CA-DEST         TO TOOO
 
            IF CA-OUT-SEAT = SPACES
-              MOVE 'N/A'        TO SEATOO
+              MOVE 'N/A' TO SEATOO
            ELSE
               MOVE CA-OUT-SEAT  TO SEATOO
            END-IF
 
       *    These values are placeholders until gate/boarding data exists.
            MOVE 'A12'           TO GATEOO
-           MOVE CA-OUT-DEP      TO DEPOO
            MOVE CA-OUT-DEP      TO BRDOO
+           MOVE CA-OUT-DEP      TO DEPOO
            MOVE 'CHECKED-IN'    TO STATOO
 
            MOVE WS-MESSAGE TO MSGO.
@@ -111,17 +98,17 @@
       * =======================================================
       *                 SEND MAP
       * =======================================================
-       SEND-BOARDINGPASS-SCREEN.
+       SEND-SCREEN.
            EXEC CICS
               SEND MAP('BPMAPS') MAPSET('BPMAPS')
-              FROM(BPMAPO)
+              FROM(BPMAPSO)
               ERASE
            END-EXEC.
 
       * =======================================================
       *                 RETURN TO TRANSID
       * =======================================================
-       RETURN-TO-BPASS.
+       RETURN-PROGRAM.
            EXEC CICS
               RETURN TRANSID(WS-TRANSID)
               COMMAREA(DFHCOMMAREA)
