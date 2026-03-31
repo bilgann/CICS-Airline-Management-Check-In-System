@@ -105,6 +105,10 @@
                        EXEC CICS RETURN END-EXEC
                    END-IF
 
+                   IF EIBAID = DFHPF1 OR EIBAID = DFHPF5
+                       PERFORM BACK-TO-INTRO
+                   END-IF
+
                    IF EIBAID = DFHENTER
                        PERFORM CLEAR-INPUT-FIELDS
                        EXEC CICS
@@ -164,12 +168,8 @@
                EXEC CICS RETURN END-EXEC
            END-IF
 
-           IF EIBAID = DFHPF1
-               EXEC CICS
-                 SEND CONTROL ERASE
-               END-EXEC
-
-               EXEC CICS RETURN END-EXEC
+                     IF EIBAID = DFHPF1 OR EIBAID = DFHPF5
+                             PERFORM BACK-TO-INTRO
            END-IF.
 
            IF EIBAID = DFHENTER
@@ -611,6 +611,18 @@
            MOVE -1 TO RETDTL
            MOVE DFHBMPEM TO RETDTA
            MOVE 'DDMMYYYY' TO RETDTO.
+
+      * =======================================================
+      *             BACK NAVIGATION TO INTRO
+      * =======================================================
+       BACK-TO-INTRO.
+           MOVE 'I' TO WS-CA-STATE
+           EXEC CICS XCTL
+               PROGRAM('FLTS')
+               COMMAREA(WS-COMMAREA)
+               LENGTH(92)
+               RESP(WS-RESP)
+           END-EXEC.
 
 
        END PROGRAM FLTS.

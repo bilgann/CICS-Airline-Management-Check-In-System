@@ -198,16 +198,9 @@
        HANDLE-OUTBOUND-INPUT.
 
       *    Check for PF keys first
-           IF EIBAID = DFHPF1
-      *        F1 = Go Back to FLTS
-               MOVE 'F' TO WS-CA-STATE
-               EXEC CICS XCTL
-                   PROGRAM('FLTS')
-                   COMMAREA(WS-COMMAREA)
-                   LENGTH(92)
-                   RESP(WS-RESP)
-               END-EXEC
-               EXEC CICS RETURN END-EXEC
+           IF EIBAID = DFHPF1 OR EIBAID = DFHPF5
+      *        F1/F5 = Go Back to FLTS
+               PERFORM BACK-TO-FLTS
            END-IF.
 
            IF EIBAID = DFHPF3
@@ -389,15 +382,9 @@
        HANDLE-RETURN-INPUT.
 
       *    Check for PF keys first
-           IF EIBAID = DFHPF1
-      *        F1 = Go Back to outbound selection
-               PERFORM SHOW-OUTBOUND-FLIGHTS
-               MOVE 'O' TO WS-CA-STATE
-               EXEC CICS
-                   RETURN TRANSID('FLSR')
-                   COMMAREA(WS-COMMAREA)
-                   LENGTH(92)
-               END-EXEC
+           IF EIBAID = DFHPF1 OR EIBAID = DFHPF5
+      *        F1/F5 = Go Back to FLTS
+               PERFORM BACK-TO-FLTS
            END-IF.
 
            IF EIBAID = DFHPF3
@@ -697,6 +684,18 @@
                SEND MAP('FLSRMAP') MAPSET('FLSRMAP')
                FROM (FLSRMAPO)
                ERASE
+           END-EXEC.
+
+      * =======================================================
+      *             BACK NAVIGATION TO FLTS
+      * =======================================================
+       BACK-TO-FLTS.
+           MOVE 'M' TO WS-CA-STATE
+           EXEC CICS XCTL
+               PROGRAM('FLTS')
+               COMMAREA(WS-COMMAREA)
+               LENGTH(92)
+               RESP(WS-RESP)
            END-EXEC.
 
 
