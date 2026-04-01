@@ -31,7 +31,7 @@ This capstone project demonstrates a full-featured airline management system des
 - **Row-based Organization** - Organized seat layout for efficient passenger placement
 
 ### 📊 Data Management
-- **ISAM File Integration** - High-performance indexed sequential access method
+- **VSAM File Integration** - High-performance indexed sequential access method
 - **COMMAREA Communication** - Efficient inter-program data passing
 - **State Machine Design** - Robust transaction state management
 
